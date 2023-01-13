@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import 'package:babysitters_app/pages/loadings/loading.dart';
 import 'package:babysitters_app/pages/parte2/Menu_Screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,14 +14,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as Path;
 
 class RegistroNanas extends StatefulWidget {
-  String email;
-  String password;
-  String type;
-  RegistroNanas(
-      {super.key,
-      required this.email,
-      required this.password,
-      required this.type});
+  RegistroNanas({
+    super.key,
+  });
 
   @override
   State<RegistroNanas> createState() => _RegistroNanasState();
@@ -73,22 +69,31 @@ class _RegistroNanasState extends State<RegistroNanas> {
                         TextInputType.name,
                         true,
                         false,
+                        false,
                         nameController),
                     SizedBox(
                       height: media.width * 0.05,
                     ),
                     //Cedula
-                    textFieltype("12344..", "Cedula", Icons.dns_outlined,
-                        TextInputType.phone, true, false, cedulaController),
+                    textFieltype(
+                        "12344..",
+                        "Cedula",
+                        Icons.dns_outlined,
+                        TextInputType.phone,
+                        true,
+                        false,
+                        false,
+                        cedulaController),
                     SizedBox(
                       height: media.width * 0.05,
                     ),
                     //Correo Electronico
                     textFieltype(
                         "Email@mail.com",
-                        widget.email,
+                        "Email@mail.com",
                         Icons.email,
                         TextInputType.emailAddress,
+                        true,
                         false,
                         false,
                         emailController),
@@ -97,11 +102,12 @@ class _RegistroNanasState extends State<RegistroNanas> {
                     ),
                     //Contraseña
                     textFieltype(
-                        widget.password,
-                        widget.password,
+                        "Contraseña",
+                        "Contraseña",
                         Icons.security,
                         TextInputType.visiblePassword,
-                        false,
+                        true,
+                        true,
                         false,
                         passwordController),
                     SizedBox(
@@ -110,29 +116,44 @@ class _RegistroNanasState extends State<RegistroNanas> {
                     //Confirmar Contraseña
                     textFieltype(
                         "Confirmar contraseña",
-                        widget.password,
+                        "Confirmar contraseña",
                         Icons.security,
                         TextInputType.visiblePassword,
                         true,
                         true,
+                        false,
                         confirmpasswordController),
                     SizedBox(
                       height: media.width * 0.05,
                     ),
                     //Direccion
-                    textFieltype("BRR COLOMBIA", "Dirrecion ", Icons.house,
-                        TextInputType.name, true, false, direccionController),
+                    textFieltype(
+                        "BRR COLOMBIA",
+                        "Dirrecion ",
+                        Icons.house,
+                        TextInputType.name,
+                        true,
+                        false,
+                        false,
+                        direccionController),
                     SizedBox(
                       height: media.width * 0.05,
                     ),
                     //Telefono
-                    textFieltype("321321321", "Telefono ", Icons.phone,
-                        TextInputType.phone, true, false, celularController),
+                    textFieltype(
+                        "321321321",
+                        "Telefono ",
+                        Icons.phone,
+                        TextInputType.phone,
+                        true,
+                        false,
+                        true,
+                        celularController),
                     SizedBox(
                       height: media.width * 0.05,
                     ),
                     textFieltype("Bachiller", "Estudios ", Icons.book,
-                        TextInputType.text, true, false, estudios),
+                        TextInputType.text, true, false, false, estudios),
                     SizedBox(
                       height: media.width * 0.05,
                     ),
@@ -193,14 +214,7 @@ class _RegistroNanasState extends State<RegistroNanas> {
               ],
             ),
           ),
-          (isloading == true)
-              ? Container(
-                  width: media.width * 1,
-                  height: media.height * 1,
-                  color: Colors.black.withOpacity(0.6),
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              : Container()
+          (isloading == true) ? Loading() : Container()
         ],
       ),
     );
@@ -267,7 +281,7 @@ class _RegistroNanasState extends State<RegistroNanas> {
                 image: (urlprofile.isNotEmpty)
                     ? NetworkImage(urlprofile)
                     : NetworkImage(
-                        "https://www.business2community.com/wp-content/uploads/2017/08/blank-profile-picture-973460_640.png")),
+                        "https://firebasestorage.googleapis.com/v0/b/projectbabys.appspot.com/o/icono.png?alt=media&token=12e79f9e-1be4-4ff9-90d1-f4fb43f8a9a3")),
             shape: BoxShape.circle,
             color: Colors.grey.withOpacity(0.2)),
       ),
@@ -284,8 +298,8 @@ class _RegistroNanasState extends State<RegistroNanas> {
         .set({
           'name': nameController.text,
           'cedula': cedulaController.text,
-          'email': widget.email,
-          'password': widget.password,
+          'email': emailController.text,
+          'password': confirmpasswordController.text,
           'celular': celularController.text,
           'direccion': direccionController.text,
           'ciudad': ciudadController.text,
@@ -293,9 +307,9 @@ class _RegistroNanasState extends State<RegistroNanas> {
           'estado': 0,
           'Estudios': estudios.text,
           'foto_perfil': urlprofile,
-          'tipo': widget.type,
           'servicio': false,
-          'idpadreselec': ""
+          'idpadreselec': "",
+          'tipo': 'ninera'
         })
         .then((value) => Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
@@ -328,51 +342,75 @@ class _RegistroNanasState extends State<RegistroNanas> {
                     !(cedulaController.text.length > 6)) {
                   snac("Cedula de ciudadania debe ir completa");
                 } else {
-                  if (!(confirmpasswordController.text.length > 8) &&
-                      !(passwordController.text ==
-                          confirmpasswordController.text)) {
-                    snac("Las contraseñas no coinciden, verificalas");
+                  if (!(emailController.text.isNotEmpty) &&
+                      !(emailController.text.contains("@") &&
+                          !emailController.text.contains("."))) {
+                    snac("Correo electronico no valido");
                   } else {
-                    if (!direccionController.text.isNotEmpty) {
-                      snac("Debes tener una direccion de residencia");
+                    if (!(passwordController.text.length > 6)) {
+                      snac("La contraseña debe ser mayor a 6 digitos");
                     } else {
-                      if (!(celularController.text.length == 10)) {
-                        snac("Numero de telefono incorrecto, verificalo");
+                      if (!(passwordController.text ==
+                          confirmpasswordController.text)) {
+                        snac("Las contraseñas no coinciden");
                       } else {
-                        if (!estudios.text.isNotEmpty) {
-                          snac("Debes decir que estudios haz tenido");
+                        if (!(confirmpasswordController.text.length > 8) &&
+                            !(passwordController.text ==
+                                confirmpasswordController.text)) {
+                          snac("Las contraseñas no coinciden, verificalas");
                         } else {
-                          if (!ciudadController.text.isNotEmpty) {
-                            snac("Debes escoger una ciudad de residencia");
+                          if (!direccionController.text.isNotEmpty) {
+                            snac("Debes tener una direccion de residencia");
                           } else {
-                            if (!fechaNacimientoController.text.isNotEmpty) {
-                              snac("Debes seleccionar una fecha de nacimiento");
+                            if (!(celularController.text.length == 10)) {
+                              snac("Numero de telefono incorrecto, verificalo");
                             } else {
-                              setState(() {
-                                isloading = true;
-                              });
-                              var id;
-                              try {
-                                final credential = await FirebaseAuth.instance
-                                    .createUserWithEmailAndPassword(
-                                  email: widget.email,
-                                  password: widget.password,
-                                );
-                                id = credential.user!.uid;
-                                setState(() {
-                                  isloading = false;
-                                });
-                                addUser(id);
-                              } on FirebaseAuthException catch (e) {
-                                if (e.code == 'weak-password') {
+                              if (!estudios.text.isNotEmpty) {
+                                snac("Debes decir que estudios haz tenido");
+                              } else {
+                                if (!ciudadController.text.isNotEmpty) {
                                   snac(
-                                      'La contraseña proporcionada es demasiado débil.');
-                                } else if (e.code == 'email-already-in-use') {
-                                  snac(
-                                      'La cuenta ya existe para ese correo electrónico.');
+                                      "Debes escoger una ciudad de residencia");
+                                } else {
+                                  if (!fechaNacimientoController
+                                      .text.isNotEmpty) {
+                                    snac(
+                                        "Debes seleccionar una fecha de nacimiento");
+                                  } else {
+                                    setState(() {
+                                      isloading = true;
+                                    });
+                                    var id;
+                                    try {
+                                      final credential = await FirebaseAuth
+                                          .instance
+                                          .createUserWithEmailAndPassword(
+                                        email: emailController.text,
+                                        password:
+                                            confirmpasswordController.text,
+                                      );
+                                      id = credential.user!.uid;
+                                      setState(() {
+                                        isloading = false;
+                                      });
+                                      addUser(id);
+                                    } on FirebaseAuthException catch (e) {
+                                      if (e.code == 'weak-password') {
+                                        snac(
+                                            'La contraseña proporcionada es demasiado débil.');
+                                      } else if (e.code ==
+                                          'email-already-in-use') {
+                                        setState(
+                                          () => isloading = false,
+                                        );
+                                        snac(
+                                            'La cuenta ya existe para ese correo electrónico.');
+                                      }
+                                    } catch (e) {
+                                      print(e);
+                                    }
+                                  }
                                 }
-                              } catch (e) {
-                                print(e);
                               }
                             }
                           }
@@ -487,6 +525,7 @@ class _RegistroNanasState extends State<RegistroNanas> {
       TextInputType type,
       bool enabled,
       bool pas,
+      bool telf,
       TextEditingController controller) {
     //Pedir Email
     return Container(
@@ -495,6 +534,7 @@ class _RegistroNanasState extends State<RegistroNanas> {
         keyboardType: type,
         enabled: enabled,
         obscureText: pas,
+        maxLength: (telf == true) ? 10 : null,
         controller: controller,
         cursorColor: colorprincipal,
         decoration: InputDecoration(

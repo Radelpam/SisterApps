@@ -13,14 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as Path;
 
 class RegistroPadres extends StatefulWidget {
-  String email;
-  String password;
-  String type;
-  RegistroPadres(
-      {super.key,
-      required this.email,
-      required this.password,
-      required this.type});
+  RegistroPadres({super.key});
 
   @override
   State<RegistroPadres> createState() => _RegistroPadresState();
@@ -72,22 +65,31 @@ class _RegistroPadresState extends State<RegistroPadres> {
                         TextInputType.name,
                         true,
                         false,
+                        false,
                         nameController),
                     SizedBox(
                       height: media.width * 0.05,
                     ),
                     //Cedula
-                    textFieltype("12344..", "Cedula", Icons.dns_outlined,
-                        TextInputType.phone, true, false, cedulaController),
+                    textFieltype(
+                        "12344..",
+                        "Cedula",
+                        Icons.dns_outlined,
+                        TextInputType.phone,
+                        true,
+                        false,
+                        false,
+                        cedulaController),
                     SizedBox(
                       height: media.width * 0.05,
                     ),
                     //Correo Electronico
                     textFieltype(
                         "Email@mail.com",
-                        widget.email,
+                        "Email@mail.com",
                         Icons.email,
                         TextInputType.emailAddress,
+                        true,
                         false,
                         false,
                         emailController),
@@ -96,10 +98,11 @@ class _RegistroPadresState extends State<RegistroPadres> {
                     ),
                     //Contraseña
                     textFieltype(
-                        widget.password,
-                        widget.password,
+                        "Contraseña",
+                        "Contraseña",
                         Icons.security,
                         TextInputType.visiblePassword,
+                        true,
                         false,
                         false,
                         passwordController),
@@ -109,24 +112,39 @@ class _RegistroPadresState extends State<RegistroPadres> {
                     //Confirmar Contraseña
                     textFieltype(
                         "Confirmar contraseña",
-                        widget.password,
+                        "Confirmar contraseña",
                         Icons.security,
                         TextInputType.visiblePassword,
                         true,
                         true,
+                        false,
                         confirmpasswordController),
                     SizedBox(
                       height: media.width * 0.05,
                     ),
                     //Direccion
-                    textFieltype("BRR COLOMBIA", "Dirrecion ", Icons.house,
-                        TextInputType.name, true, false, direccionController),
+                    textFieltype(
+                        "BRR COLOMBIA",
+                        "Dirrecion ",
+                        Icons.house,
+                        TextInputType.name,
+                        true,
+                        false,
+                        false,
+                        direccionController),
                     SizedBox(
                       height: media.width * 0.05,
                     ),
                     //Telefono
-                    textFieltype("321321321", "Telefono ", Icons.phone,
-                        TextInputType.phone, true, false, celularController),
+                    textFieltype(
+                        "321321321",
+                        "Telefono ",
+                        Icons.phone,
+                        TextInputType.phone,
+                        true,
+                        false,
+                        true,
+                        celularController),
                     SizedBox(
                       height: media.width * 0.05,
                     ),
@@ -265,7 +283,7 @@ class _RegistroPadresState extends State<RegistroPadres> {
                 image: (urlprofile.isNotEmpty)
                     ? NetworkImage(urlprofile)
                     : NetworkImage(
-                        "https://www.business2community.com/wp-content/uploads/2017/08/blank-profile-picture-973460_640.png")),
+                        "https://firebasestorage.googleapis.com/v0/b/projectbabys.appspot.com/o/icono.png?alt=media&token=12e79f9e-1be4-4ff9-90d1-f4fb43f8a9a3")),
             shape: BoxShape.circle,
             color: Colors.grey.withOpacity(0.2)),
       ),
@@ -282,23 +300,22 @@ class _RegistroPadresState extends State<RegistroPadres> {
         .set({
           'name': nameController.text,
           'cedula': cedulaController.text,
-          'email': widget.email,
-          'password': widget.password,
+          'email': emailController.text,
+          'password': confirmpasswordController.text,
           'celular': celularController.text,
           'direccion': direccionController.text,
           'ciudad': ciudadController.text,
           'fechaNacimiento': fechaNacimientoController.text,
           'foto_perfil': urlprofile,
-          'tipo': widget.type,
           'esperando': false,
           'servidoract': false,
-          'idnineraselec': ""
+          'idnineraselec': "",
+          'tipo': 'client'
         })
-        .then((value) => Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (context) => MenuScreen(),
-            ),
-            (route) => false))
+        .then(
+            (value) => Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (context) => MenuScreen(),
+                )))
         .catchError((error) => succes == false);
     return succes;
     /* return users
@@ -325,48 +342,67 @@ class _RegistroPadresState extends State<RegistroPadres> {
                     !(cedulaController.text.length > 6)) {
                   snac("Cedula de ciudadania debe ir completa");
                 } else {
-                  if (!(confirmpasswordController.text.length > 8) &&
-                      !(passwordController.text ==
-                          confirmpasswordController.text)) {
-                    snac("Las contraseñas no coinciden, verificalas");
+                  if (!emailController.text.isNotEmpty &&
+                      !emailController.text.contains("@") &&
+                      !emailController.text.contains(".")) {
+                    snac("Correo electronico invalido");
                   } else {
-                    if (!direccionController.text.isNotEmpty) {
-                      snac("Debes tener una direccion de residencia");
+                    if (!(passwordController.text.length > 6)) {
+                      snac("La contraseña debe ser mayor a 6 digitos");
                     } else {
-                      if (!(celularController.text.length == 10)) {
-                        snac("Numero de telefono incorrecto, verificalo");
+                      if (!(passwordController.text ==
+                          confirmpasswordController.text)) {
+                        snac("La contraseña no coincide con la confirmacion");
                       } else {
-                        if (!ciudadController.text.isNotEmpty) {
-                          snac("Debes escoger una ciudad de residencia");
+                        if (!(confirmpasswordController.text.length > 8) &&
+                            !(passwordController.text ==
+                                confirmpasswordController.text)) {
+                          snac("Las contraseñas no coinciden, verificalas");
                         } else {
-                          if (!fechaNacimientoController.text.isNotEmpty) {
-                            snac("Debes seleccionar una fecha de nacimiento");
+                          if (!direccionController.text.isNotEmpty) {
+                            snac("Debes tener una direccion de residencia");
                           } else {
-                            setState(() {
-                              isloading = true;
-                            });
-                            var id;
-                            try {
-                              final credential = await FirebaseAuth.instance
-                                  .createUserWithEmailAndPassword(
-                                email: widget.email,
-                                password: widget.password,
-                              );
-                              id = credential.user!.uid;
-                              setState(() {
-                                isloading = false;
-                              });
-                              addUser(id);
-                            } on FirebaseAuthException catch (e) {
-                              if (e.code == 'weak-password') {
-                                snac(
-                                    'La contraseña proporcionada es demasiado débil.');
-                              } else if (e.code == 'email-already-in-use') {
-                                snac(
-                                    'La cuenta ya existe para ese correo electrónico.');
+                            if (!(celularController.text.length == 10)) {
+                              snac("Numero de telefono incorrecto, verificalo");
+                            } else {
+                              if (!ciudadController.text.isNotEmpty) {
+                                snac("Debes escoger una ciudad de residencia");
+                              } else {
+                                if (!fechaNacimientoController
+                                    .text.isNotEmpty) {
+                                  snac(
+                                      "Debes seleccionar una fecha de nacimiento");
+                                } else {
+                                  setState(() {
+                                    isloading = true;
+                                  });
+                                  var id;
+                                  try {
+                                    final credential = await FirebaseAuth
+                                        .instance
+                                        .createUserWithEmailAndPassword(
+                                      email: emailController.text,
+                                      password: confirmpasswordController.text,
+                                    );
+                                    id = credential.user!.uid;
+                                    setState(() {
+                                      isloading = false;
+                                    });
+                                    addUser(id);
+                                  } on FirebaseAuthException catch (e) {
+                                    if (e.code == 'weak-password') {
+                                      snac(
+                                          'La contraseña proporcionada es demasiado débil.');
+                                    } else if (e.code ==
+                                        'email-already-in-use') {
+                                      snac(
+                                          'La cuenta ya existe para ese correo electrónico.');
+                                    }
+                                  } catch (e) {
+                                    print(e);
+                                  }
+                                }
                               }
-                            } catch (e) {
-                              print(e);
                             }
                           }
                         }
@@ -480,6 +516,7 @@ class _RegistroPadresState extends State<RegistroPadres> {
       TextInputType type,
       bool enabled,
       bool pas,
+      bool leng,
       TextEditingController controller) {
     //Pedir Email
     return Container(
@@ -490,6 +527,7 @@ class _RegistroPadresState extends State<RegistroPadres> {
         obscureText: pas,
         controller: controller,
         cursorColor: colorprincipal,
+        maxLength: (leng == true) ? 10 : null,
         decoration: InputDecoration(
             focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.all(Radius.circular(12)),
